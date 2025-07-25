@@ -55,9 +55,6 @@
   <label>Phiên bản</label>
   <input type="text" id="version">
 
-  <label>Dung lượng</label>
-  <input type="text" id="size">
-
   <label>Danh mục</label>
   <select id="category">
     <option value="apps">Apps</option>
@@ -113,7 +110,6 @@
       const id = parseInt(document.getElementById("id").value);
       const name = document.getElementById("name").value;
       const version = document.getElementById("version").value;
-      const size = document.getElementById("size").value;
       const category = document.getElementById("category").value;
       const description = document.getElementById("description").value;
       const icon = uploadedIconLink;
@@ -126,7 +122,6 @@
         id,
         name,
         version,
-        size,
         category,
         description,
         icon,
