@@ -2,124 +2,150 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Trình tạo code app-item</title>
+  <title>Trình tạo JSON App</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f2f2f2;
       max-width: 800px;
       margin: 40px auto;
       padding: 20px;
-      background: #f2f2f2;
-    }
-    h1 {
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
     }
     input, select, textarea {
       width: 100%;
-      padding: 8px;
-      margin-top: 4px;
+      padding: 10px;
+      margin-top: 10px;
       box-sizing: border-box;
     }
-    textarea {
-      resize: vertical;
+    button {
+      padding: 10px 20px;
+      margin-top: 15px;
+      cursor: pointer;
+      background: #0ef;
+      border: none;
+      font-weight: bold;
     }
-    #result {
+    #output {
       background: #fff;
       padding: 15px;
       margin-top: 20px;
-      border: 1px solid #ccc;
-      font-family: monospace;
       white-space: pre-wrap;
-      word-break: break-word;
+      border: 1px solid #ccc;
     }
-    button {
-      display: block;
+    img {
       margin-top: 10px;
-      padding: 10px 20px;
-      font-weight: bold;
-      cursor: pointer;
+      max-width: 200px;
+    }
+    #copyBtn {
+      margin-top: 10px;
+      background: #4CAF50;
+      color: white;
     }
   </style>
 </head>
 <body>
+  <h1>🛠️ Trình tạo JSON App/Game</h1>
 
-  <h1>Trình tạo mã App Item</h1>
+  <label>ID</label>
+  <input type="number" id="id">
 
-  <form id="appForm">
-    <label>1. Loại (data-category)</label>
-    <select id="category">
-      <option value="apps">Apps</option>
-      <option value="games">Games</option>
-    </select>
+  <label>Tên ứng dụng</label>
+  <input type="text" id="name">
 
-    <label>2. ID (data-id)</label>
-    <input type="number" id="id" required>
+  <label>Phiên bản</label>
+  <input type="text" id="version">
 
-    <label>3. Tên ứng dụng (data-name)</label>
-    <input type="text" id="name" required>
+  <label>Dung lượng</label>
+  <input type="text" id="size">
 
-    <label>4. Phiên bản (data-version)</label>
-    <input type="text" id="version" required>
+  <label>Danh mục</label>
+  <select id="category">
+    <option value="apps">Apps</option>
+    <option value="games">Games</option>
+  </select>
 
-    <label>6. Icon (data-icon)</label>
-    <input type="url" id="icon" placeholder="https://..." required>
+  <label>Mô tả</label>
+  <textarea id="description" rows="3"></textarea>
 
-    <label>7. Mô tả (data-description)</label>
-    <textarea id="description" rows="3" required></textarea>
+  <label>Ảnh icon (upload lên imgbb.com)</label>
+  <input type="file" id="iconUpload" accept="image/*">
+  <img id="iconPreview" style="display:none;" />
 
-    <label>8. Link tải xuống (data-download-link)</label>
-    <input type="url" id="downloadLink" placeholder="https://..." required>
-  </form>
+  <label>Link tải xuống</label>
+  <input type="text" id="downloadLink">
+
+  <button onclick="generateCode()">Tạo mã</button>
 
   <h2>Kết quả:</h2>
-  <div id="result"></div>
-  <button onclick="copyToClipboard()">📋 Copy Code</button>
+  <div id="output"></div>
+  <button id="copyBtn" onclick="copyCode()">📋 Copy Code</button>
 
   <script>
-    const form = document.getElementById("appForm");
-    const result = document.getElementById("result");
+    const imgbbAPIKey = "e4a594d52120c7ca47dec9bb743dfcf6"; // Thay bằng API key thật
+    let uploadedIconLink = "";
 
-    function updateResult() {
-      const category = document.getElementById("category").value;
-      const id = document.getElementById("id").value;
+    document.getElementById('iconUpload').addEventListener('change', function () {
+      const file = this.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const base64Image = e.target.result.split(',')[1];
+
+        fetch("https://api.imgbb.com/1/upload", {
+          method: "POST",
+          body: new URLSearchParams({
+            key: imgbbAPIKey,
+            image: base64Image,
+          }),
+        })
+        .then(res => res.json())
+        .then(data => {
+          uploadedIconLink = data.data.url;
+          const img = document.getElementById("iconPreview");
+          img.src = uploadedIconLink;
+          img.style.display = "block";
+        })
+        .catch(() => alert("❌ Upload ảnh thất bại, kiểm tra lại API Key"));
+      };
+      if (file) reader.readAsDataURL(file);
+    });
+
+    function generateCode() {
+      const id = parseInt(document.getElementById("id").value);
       const name = document.getElementById("name").value;
       const version = document.getElementById("version").value;
-      const icon = document.getElementById("icon").value;
+      const size = document.getElementById("size").value;
+      const category = document.getElementById("category").value;
       const description = document.getElementById("description").value;
+      const icon = uploadedIconLink;
       const downloadLink = document.getElementById("downloadLink").value;
+      const addedDate = new Date().toISOString().split('T')[0];
 
-      const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+      if (!icon) return alert("❗ Bạn cần upload icon!");
 
-      const html = `<div class="app-item" 
-data-category="${category}" 
-data-id="${id}" 
-data-name="${name}" 
-data-version="${version}" 
-data-added="${today}" 
-data-icon="${icon}" 
-data-description="${description}" 
-data-download-link="${downloadLink}"></div>`;
+      const json = {
+        id,
+        name,
+        version,
+        size,
+        category,
+        description,
+        icon,
+        addedDate: `__DATE__`,
+        downloadLink
+      };
 
-      result.textContent = html;
+      let output = JSON.stringify(json, null, 4);
+      output = output.replace('"__DATE__"', `new Date("${addedDate}")`);
+      document.getElementById("output").textContent = output + ",";
     }
 
-    function copyToClipboard() {
-      const code = result.textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        alert("✅ Đã sao chép đoạn code!");
-      }).catch(err => {
-        alert("❌ Sao chép thất bại: " + err);
-      });
+    function copyCode() {
+      const code = document.getElementById("output").textContent;
+      if (!code) return alert("⚠️ Chưa có đoạn mã để copy!");
+      navigator.clipboard.writeText(code)
+        .then(() => alert("✅ Đã copy đoạn mã!"))
+        .catch(() => alert("❌ Không thể copy. Hãy thử thủ công."));
     }
-
-    form.addEventListener("input", updateResult);
-    window.addEventListener("load", updateResult);
   </script>
-
 </body>
 </html>
