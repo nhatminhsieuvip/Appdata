@@ -66,9 +66,6 @@
     <label>4. Phiên bản (data-version)</label>
     <input type="text" id="version" required>
 
-    <label>5. Dung lượng (data-size)</label>
-    <input type="text" id="size" placeholder="Ví dụ: 85.2 MB" required>
-
     <label>6. Icon (data-icon)</label>
     <input type="url" id="icon" placeholder="https://..." required>
 
@@ -92,7 +89,6 @@
       const id = document.getElementById("id").value;
       const name = document.getElementById("name").value;
       const version = document.getElementById("version").value;
-      const size = document.getElementById("size").value;
       const icon = document.getElementById("icon").value;
       const description = document.getElementById("description").value;
       const downloadLink = document.getElementById("downloadLink").value;
@@ -104,7 +100,6 @@ data-category="${category}"
 data-id="${id}" 
 data-name="${name}" 
 data-version="${version}" 
-data-size="${size}" 
 data-added="${today}" 
 data-icon="${icon}" 
 data-description="${description}" 
